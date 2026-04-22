@@ -15,37 +15,46 @@ body {
 /* HEADER */
 .header {
     text-align: center;
-    padding: 30px 20px 10px;
-    font-size: 48px;
+    padding: 35px 20px 15px;
+    font-size: 56px;
     font-weight: bold;
     letter-spacing: 2px;
     color: #2d2d5a;
 }
 
-/* DIRECTORY GRID */
+/* DIRECTORY */
 .directory {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 40px;
-    padding: 20px 60px 100px;
+    column-count: 4;
+    column-gap: 50px;
+    padding: 10px 60px 110px;
 }
 
 /* ROW */
 .row {
     display: flex;
     justify-content: space-between;
-    font-size: 18px;
+    align-items: center;
+
+    font-size: 22px;
+    line-height: 1.4;
+
     padding: 6px 0;
     border-bottom: 1px solid #ddd;
+
+    break-inside: avoid;
 }
 
+/* TEXT ALIGNMENT */
 .company {
-    max-width: 75%;
+    flex: 1;
+    padding-right: 12px;
 }
 
 .suite {
+    width: 100px;
     text-align: right;
     white-space: nowrap;
+    font-weight: 600;
 }
 
 /* FOOTER */
@@ -57,8 +66,10 @@ body {
     color: white;
     display: flex;
     justify-content: space-between;
-    padding: 18px 40px;
-    font-size: 20px;
+    align-items: center;
+
+    padding: 20px 50px;
+    font-size: 22px;
     box-sizing: border-box;
 }
 </style>
@@ -70,9 +81,7 @@ body {
     200 BROADHOLLOW ROAD
 </div>
 
-<div id="directory" class="directory">
-    <!-- DATA WILL LOAD HERE -->
-</div>
+<div id="directory" class="directory"></div>
 
 <div class="footer">
     <div>Welcome to 200 Broadhollow Road</div>
@@ -80,54 +89,96 @@ body {
 </div>
 
 <script>
-// 🔗 Replace with your JSON endpoint
-const sheetURL = "PASTE_YOUR_JSON_URL_HERE";
+
+// 🔥 REPLACE THIS WITH YOUR REAL SHEET
+const sheetURL = "https://opensheet.elk.sh/1-LFIg-LOzalW4ymOKS_L7Gyqot3G6qZIjK12l8UWPa4/Sheet1";
+
+// fallback sample data
+const sampleData = [
+  { Company: "A Continuous Charity", Suite: "207" },
+  { Company: "A & F Capital Group", Suite: "207" },
+  { Company: "A.B. Computer Systems, Inc", Suite: "207" },
+  { Company: "Accurecord", Suite: "207" },
+  { Company: "AMAL Wealth Services", Suite: "207" },
+  { Company: "Archive 360", Suite: "207" },
+  { Company: "ASAP Insurance Brokerage Inc.", Suite: "207" },
+  { Company: "Bell Law Group", Suite: "207" },
+  { Company: "Blue Chip Financial", Suite: "207" },
+  { Company: "Caldwell Sutter Capital", Suite: "207" },
+  { Company: "Choice Tax Solutions, Inc", Suite: "207" },
+  { Company: "Clearwater Capital Group", Suite: "207" },
+  { Company: "Colliers Engineering and Design", Suite: "207" },
+  { Company: "Fields Protective Services", Suite: "207" },
+  { Company: "Holmes Investigative & Security Solutions", Suite: "207" },
+  { Company: "Imagine Remodeling Inc.", Suite: "207" },
+  { Company: "JRS Financial Services, LLC", Suite: "207" },
+  { Company: "Kingstone Insurance", Suite: "207" },
+  { Company: "Law Office of Eitan Dagan", Suite: "207" },
+  { Company: "Law Offices of Lawrence Cohen", Suite: "207" },
+  { Company: "Lendifed", Suite: "207" },
+  { Company: "Long Island DNA", Suite: "207" },
+  { Company: "Matra", Suite: "207" },
+  { Company: "Mavros Panagos Law", Suite: "207" },
+  { Company: "Mercury Insurance Services, Inc.", Suite: "207" },
+  { Company: "Old Field Advisors LLC", Suite: "207" },
+  { Company: "ProHealth Connect", Suite: "207" },
+  { Company: "Quick Confirm", Suite: "207" },
+  { Company: "Raymond James", Suite: "207" },
+  { Company: "Regus", Suite: "207" },
+  { Company: "Revamp Agency", Suite: "207" },
+  { Company: "SEO Image", Suite: "207" },
+  { Company: "Sir Speedy", Suite: "207" },
+  { Company: "Sly Fox Systems", Suite: "207" },
+  { Company: "Tarventure Media", Suite: "207" },
+  { Company: "The Law Office of Carmine E. Esposito", Suite: "207" },
+  { Company: "Thinkshop Advisor LLC", Suite: "207" },
+  { Company: "Trade Ship", Suite: "207" },
+  { Company: "Unishippers", Suite: "207" },
+  { Company: "Wave Agency", Suite: "207" },
+  { Company: "Web Rocket Media LLC", Suite: "207" },
+  { Company: "Zaroff & Zaroff PLLC", Suite: "207" },
+  { Company: "Ameriprise Financial Services, Inc.", Suite: "302" },
+  { Company: "JDC Energy Services", Suite: "306" },
+  { Company: "Cohen & Mason CPA's, PC", Suite: "308" },
+  { Company: "Bangel, Cohen & Falconetti, LLP", Suite: "309" },
+  { Company: "HumanHire", Suite: "309" },
+  { Company: "Forest Hills Financial Group", Suite: "410" }
+];
 
 async function loadData() {
     try {
         const res = await fetch(sheetURL);
         let data = await res.json();
-
-        // Remove empty rows
-        data = data.filter(row => row.Company);
-
-        // Sort A-Z
-        data.sort((a, b) => a.Company.localeCompare(b.Company));
-
-        const container = document.getElementById("directory");
-        container.innerHTML = "";
-
-        // Split into 4 columns
-        const chunkSize = Math.ceil(data.length / 4);
-
-        for (let i = 0; i < 4; i++) {
-            const column = document.createElement("div");
-
-            const chunk = data.slice(i * chunkSize, (i + 1) * chunkSize);
-
-            chunk.forEach(row => {
-                const div = document.createElement("div");
-                div.className = "row";
-
-                div.innerHTML = `
-                    <div class="company">${row.Company}</div>
-                    <div class="suite">Suite ${row.Suite}</div>
-                `;
-
-                column.appendChild(div);
-            });
-
-            container.appendChild(column);
-        }
-
+        renderData(data);
     } catch (err) {
-        console.error("Failed to load data", err);
+        console.warn("Using sample data");
+        renderData(sampleData);
     }
 }
 
-// Initial load + refresh
+function renderData(data) {
+    data = data.filter(row => row.Company);
+    data.sort((a, b) => a.Company.localeCompare(b.Company));
+
+    const container = document.getElementById("directory");
+    container.innerHTML = "";
+
+    data.forEach(row => {
+        const div = document.createElement("div");
+        div.className = "row";
+
+        div.innerHTML = `
+            <div class="company">${row.Company}</div>
+            <div class="suite">Suite ${row.Suite}</div>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
 loadData();
 setInterval(loadData, 60000);
+
 </script>
 
 </body>

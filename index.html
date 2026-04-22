@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>200 Broadhollow Road Directory</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f4f4f4;
+    color: #222;
+}
+
+/* HEADER */
+.header {
+    text-align: center;
+    padding: 30px 20px 10px;
+    font-size: 48px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    color: #2d2d5a;
+}
+
+/* DIRECTORY GRID */
+.directory {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 40px;
+    padding: 20px 60px 100px;
+}
+
+/* ROW */
+.row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 18px;
+    padding: 6px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.company {
+    max-width: 75%;
+}
+
+.suite {
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* FOOTER */
+.footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: #2f3c7e;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    padding: 18px 40px;
+    font-size: 20px;
+    box-sizing: border-box;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    200 BROADHOLLOW ROAD
+</div>
+
+<div id="directory" class="directory">
+    <!-- DATA WILL LOAD HERE -->
+</div>
+
+<div class="footer">
+    <div>Welcome to 200 Broadhollow Road</div>
+    <div>Leasing / Management Office 631-421-1000</div>
+</div>
+
+<script>
+// 🔗 Replace with your JSON endpoint
+const sheetURL = "PASTE_YOUR_JSON_URL_HERE";
+
+async function loadData() {
+    try {
+        const res = await fetch(sheetURL);
+        let data = await res.json();
+
+        // Remove empty rows
+        data = data.filter(row => row.Company);
+
+        // Sort A-Z
+        data.sort((a, b) => a.Company.localeCompare(b.Company));
+
+        const container = document.getElementById("directory");
+        container.innerHTML = "";
+
+        // Split into 4 columns
+        const chunkSize = Math.ceil(data.length / 4);
+
+        for (let i = 0; i < 4; i++) {
+            const column = document.createElement("div");
+
+            const chunk = data.slice(i * chunkSize, (i + 1) * chunkSize);
+
+            chunk.forEach(row => {
+                const div = document.createElement("div");
+                div.className = "row";
+
+                div.innerHTML = `
+                    <div class="company">${row.Company}</div>
+                    <div class="suite">Suite ${row.Suite}</div>
+                `;
+
+                column.appendChild(div);
+            });
+
+            container.appendChild(column);
+        }
+
+    } catch (err) {
+        console.error("Failed to load data", err);
+    }
+}
+
+// Initial load + refresh
+loadData();
+setInterval(loadData, 60000);
+</script>
+
+</body>
+</html>

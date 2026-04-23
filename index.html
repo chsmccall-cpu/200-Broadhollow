@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>200 Broadhollow Road Directory</title>
 
-<!-- Force BrightSign + browser to always load latest version -->
+<!-- Prevent caching -->
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -81,7 +81,7 @@ body {
 
 /* FOOTER */
 .footer {
-    position: relative; /* 👈 important */
+    position: relative;
     height: 8vh;
     background: #2f3c7e;
     color: white;
@@ -95,6 +95,7 @@ body {
     border-top: 2px solid rgba(255,255,255,0.2);
 }
 
+/* Footer layout */
 .footer-left {
     position: absolute;
     left: 2vw;
@@ -108,14 +109,8 @@ body {
 .center-info {
     position: absolute;
     left: 50%;
-    transform: translateX(-50%); /* 👈 TRUE CENTER */
+    transform: translateX(-50%);
     text-align: center;
-}
-
-/* CENTER INFO (weather + clock) */
-.center-info {
-    text-align: center;
-    line-height: 1.2;
 }
 
 #weather {
@@ -143,7 +138,7 @@ body {
     </div>
 
     <div class="center-info">
-        <div id="weather"></div>
+        <div id="weather">Loading weather...</div>
         <div id="clock"></div>
     </div>
 
@@ -199,20 +194,7 @@ function renderData(data) {
     }
 }
 
-/* WEATHER + ICON */
-function getWeatherIcon(desc) {
-    desc = desc.toLowerCase();
-
-    if (desc.includes("sun")) return "☀️";
-    if (desc.includes("cloud")) return "☁️";
-    if (desc.includes("rain")) return "🌧️";
-    if (desc.includes("snow")) return "❄️";
-    if (desc.includes("storm")) return "⛈️";
-    if (desc.includes("fog")) return "🌫️";
-
-    return "🌤️";
-}
-
+/* WEATHER (no icons) */
 async function loadWeather() {
     try {
         const res = await fetch("https://wttr.in/Melville,NY?format=j1");
@@ -220,10 +202,9 @@ async function loadWeather() {
 
         const temp = data.current_condition[0].temp_F;
         const desc = data.current_condition[0].weatherDesc[0].value;
-        const icon = getWeatherIcon(desc);
 
         document.getElementById("weather").innerHTML =
-            `${icon} ${temp}°F • ${desc}`;
+            `${temp}°F • ${desc}`;
     } catch (err) {
         document.getElementById("weather").innerHTML = "";
     }
@@ -247,13 +228,18 @@ function updateClock() {
     document.getElementById("clock").innerHTML = `${date} • ${time}`;
 }
 
+/* AUTO RELOAD (every 3 hours) */
+setInterval(() => {
+    location.reload(true);
+}, 3 * 60 * 60 * 1000);
+
 loadData();
 loadWeather();
 updateClock();
 
 setInterval(loadData, 60000);
-setInterval(loadWeather, 600000); // 10 min
-setInterval(updateClock, 1000);   // every second
+setInterval(loadWeather, 600000);
+setInterval(updateClock, 1000);
 
 </script>
 

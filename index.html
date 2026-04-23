@@ -16,7 +16,7 @@
 
 body {
     margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: "Segoe UI", Arial, sans-serif;
     background: #e9edf3;
     color: #222;
     overflow: hidden;
@@ -24,21 +24,48 @@ body {
 
 /* HEADER */
 .header {
-    text-align: center;
-    height: 10vh;
+    position: relative;
+    height: 14vh; /* 👈 more breathing room */
+
     display: flex;
     align-items: center;
     justify-content: center;
 
-    font-size: 3.2vw;
-    font-weight: bold;
+    font-size: 2.8vw;
+    font-weight: 600;
     letter-spacing: 2px;
-    color: #2d2d5a;
+    color: #1f2a44;
+}
+
+.title {
+    display: flex;
+    align-items: center;
+    width: 90%;
+}
+
+.text {
+    padding: 0 24px;
+    white-space: nowrap;
+    letter-spacing: 3px;
+}
+
+/* LINES */
+.line {
+    height: 2px;
+    flex: 1;
+}
+
+.line.left {
+    background: linear-gradient(to right, transparent, #2f3c7e);
+}
+
+.line.right {
+    background: linear-gradient(to left, transparent, #2f3c7e);
 }
 
 /* DIRECTORY */
 .directory {
-    height: 82vh;
+    height: 78vh; /* 👈 adjusted because header got bigger */
     padding: 0 2vw 2vh;
 
     display: grid;
@@ -50,7 +77,7 @@ body {
 .column {
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
+    justify-content: space-between;
 }
 
 /* ROW */
@@ -59,7 +86,7 @@ body {
     justify-content: space-between;
     align-items: center;
 
-    font-size: 0.95vw;
+    font-size: var(--row-size, 1.05vw);
     padding: 2px 0;
     border-bottom: 1px solid #ddd;
 }
@@ -72,19 +99,22 @@ body {
 .company {
     flex: 1;
     padding-right: 8px;
+    font-weight: 500;
 }
 
-/* SUB-LINE */
+/* SUB */
 .sub {
-    font-size: 0.75em;
-    opacity: 0.9;
-    color: #5a6a85;
+    font-size: 0.7em;
+    color: #2f3c55;
     margin-top: 1px;
+    line-height: 1.1;
 }
 
+/* SUITE */
 .suite {
     white-space: nowrap;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: 0.3px;
 }
 
 /* FOOTER */
@@ -135,7 +165,11 @@ body {
 <body>
 
 <div class="header">
-    200 BROADHOLLOW ROAD
+    <div class="title">
+        <span class="line left"></span>
+        <span class="text">200 BROADHOLLOW ROAD</span>
+        <span class="line right"></span>
+    </div>
 </div>
 
 <div id="directory" class="directory"></div>
@@ -151,7 +185,7 @@ body {
     </div>
 
     <div class="footer-right">
-        Leasing / Management Office 631-421-1000
+        Leasing / Management Office: (631) 421-1000
     </div>
 </div>
 
@@ -191,7 +225,7 @@ function renderData(data) {
                 div.innerHTML = `
                     <div class="company">
                         ${row.Company}
-                        ${row.Sub ? `<div class="sub">${row.Sub}</div>` : ""}
+                        ${row.Sub ? `<div class="sub">${row.Sub.replace(/\n/g, "<br>")}</div>` : ""}
                     </div>
                     <div class="suite">
                         ${row.Suite ? "Suite " + row.Suite : ""}
@@ -202,6 +236,29 @@ function renderData(data) {
             });
 
         container.appendChild(col);
+    }
+
+    setTimeout(autoFitText, 50);
+}
+
+/* AUTO-FIT */
+function autoFitText() {
+    const container = document.getElementById("directory");
+    let size = 1.05;
+
+    function fits() {
+        return container.scrollHeight <= container.clientHeight;
+    }
+
+    function applySize() {
+        document.documentElement.style.setProperty('--row-size', size + 'vw');
+    }
+
+    applySize();
+
+    while (!fits() && size > 0.6) {
+        size -= 0.02;
+        applySize();
     }
 }
 

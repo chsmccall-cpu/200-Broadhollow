@@ -12,9 +12,9 @@
 body {
     margin: 0;
     font-family: Arial, Helvetica, sans-serif;
-    background: #f4f4f4;
+    background: #e9edf3;
     color: #222;
-    overflow: hidden; /* 🚨 prevents scrolling */
+    overflow: hidden;
 }
 
 /* HEADER */
@@ -31,11 +31,11 @@ body {
     color: #2d2d5a;
 }
 
-/* DIRECTORY AREA */
+/* DIRECTORY */
 .directory {
     height: 82vh;
-    padding: 0 2vw 2vh; /* ⬅️ added bottom padding */
-    
+    padding: 0 2vw 2vh;
+
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     column-gap: 2vw;
@@ -45,7 +45,7 @@ body {
 .column {
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly; /* 🚨 evenly fills height */
+    justify-content: space-evenly;
 }
 
 /* ROW */
@@ -54,9 +54,13 @@ body {
     justify-content: space-between;
     align-items: center;
 
-    font-size: 0.95vw; /* 🚨 auto scales with screen */
+    font-size: 0.95vw;
     padding: 2px 0;
     border-bottom: 1px solid #ddd;
+}
+
+.row:nth-child(even) {
+    background: rgba(0, 0, 0, 0.03);
 }
 
 /* TEXT */
@@ -72,18 +76,50 @@ body {
 
 /* FOOTER */
 .footer {
+    position: relative; /* 👈 important */
     height: 8vh;
     background: #2f3c7e;
     color: white;
 
     display: flex;
-    justify-content: space-between;
     align-items: center;
 
     padding: 0 2vw;
     font-size: 0.9vw;
 
-    border-top: 2px solid rgba(255,255,255,0.2); /* 👈 add this */
+    border-top: 2px solid rgba(255,255,255,0.2);
+}
+
+.footer-left {
+    position: absolute;
+    left: 2vw;
+}
+
+.footer-right {
+    position: absolute;
+    right: 2vw;
+}
+
+.center-info {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%); /* 👈 TRUE CENTER */
+    text-align: center;
+}
+
+/* CENTER INFO (weather + clock) */
+.center-info {
+    text-align: center;
+    line-height: 1.2;
+}
+
+#weather {
+    font-size: 0.9vw;
+}
+
+#clock {
+    font-size: 0.8vw;
+    opacity: 0.8;
 }
 </style>
 </head>
@@ -97,14 +133,25 @@ body {
 <div id="directory" class="directory"></div>
 
 <div class="footer">
-    <div>Welcome to 200 Broadhollow Road</div>
-    <div>Leasing / Management Office 631-421-1000</div>
+    <div class="footer-left">
+        Welcome to 200 Broadhollow Road
+    </div>
+
+    <div class="center-info">
+        <div id="weather"></div>
+        <div id="clock"></div>
+    </div>
+
+    <div class="footer-right">
+        Leasing / Management Office 631-421-1000
+    </div>
 </div>
 
 <script>
 
 const sheetURL = "https://opensheet.elk.sh/1-LFIg-LOzalW4ymOKS_L7Gyqot3G6qZIjK12l8UWPa4/Sheet1";
 
+/* DIRECTORY */
 async function loadData() {
     try {
         const res = await fetch(sheetURL);
@@ -122,7 +169,6 @@ function renderData(data) {
     const container = document.getElementById("directory");
     container.innerHTML = "";
 
-    // 🔥 split into 4 equal columns
     const perColumn = Math.ceil(data.length / 4);
 
     for (let i = 0; i < 4; i++) {
@@ -136,7 +182,9 @@ function renderData(data) {
 
                 div.innerHTML = `
                     <div class="company">${row.Company}</div>
-                    <div class="suite">Suite ${row.Suite}</div>
+                    <div class="suite">
+                        ${row.Suite ? "Suite " + row.Suite : ""}
+                    </div>
                 `;
 
                 col.appendChild(div);
@@ -146,8 +194,61 @@ function renderData(data) {
     }
 }
 
+/* WEATHER + ICON */
+function getWeatherIcon(desc) {
+    desc = desc.toLowerCase();
+
+    if (desc.includes("sun")) return "☀️";
+    if (desc.includes("cloud")) return "☁️";
+    if (desc.includes("rain")) return "🌧️";
+    if (desc.includes("snow")) return "❄️";
+    if (desc.includes("storm")) return "⛈️";
+    if (desc.includes("fog")) return "🌫️";
+
+    return "🌤️";
+}
+
+async function loadWeather() {
+    try {
+        const res = await fetch("https://wttr.in/Melville,NY?format=j1");
+        const data = await res.json();
+
+        const temp = data.current_condition[0].temp_F;
+        const desc = data.current_condition[0].weatherDesc[0].value;
+        const icon = getWeatherIcon(desc);
+
+        document.getElementById("weather").innerHTML =
+            `${icon} ${temp}°F • ${desc}`;
+    } catch (err) {
+        document.getElementById("weather").innerHTML = "";
+    }
+}
+
+/* CLOCK */
+function updateClock() {
+    const now = new Date();
+
+    const time = now.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+
+    const date = now.toLocaleDateString([], {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric'
+    });
+
+    document.getElementById("clock").innerHTML = `${date} • ${time}`;
+}
+
 loadData();
+loadWeather();
+updateClock();
+
 setInterval(loadData, 60000);
+setInterval(loadWeather, 600000); // 10 min
+setInterval(updateClock, 1000);   // every second
 
 </script>
 
